@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  # 1. Relational Database with Row-Level Locking and Concurrency Control
+  db:
+    image: postgres:16-alpine
+    container_name: aegis_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: aegis_admin
+      POSTGRES_PASSWORD: aegis_secure_password_2026
+      POSTGRES_DB: aegis_erp_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegis_admin -d aegis_erp_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Redis Message Broker & In-Memory State Cache
+  redis:
+    image: redis:7-alpine
+    container_name: aegis_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 3. FastAPI High-Performance Backend (RBAC, OCC, Auditing, Analytics)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aegis_fastapi
+    restart: always
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://aegis_admin:aegis_secure_password_2026@db:5432/aegis_erp_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - JWT_SECRET_KEY=super_secret_jwt_signing_key_aegis_2026_institutional
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=480
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # 4. Celery Distributed Worker for Heavy Async Grade Processing & GPA Calculations
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: aegis_celery_worker
+    restart: always
+    command: celery -A app.tasks.celery_app.celery worker --loglevel=info --concurrency=4
+    volumes:
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=postgresql://aegis_admin:aegis_secure_password_2026@db:5432/aegis_erp_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # 5. React 19 Frontend Dashboard
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: aegis_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api/v1
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:

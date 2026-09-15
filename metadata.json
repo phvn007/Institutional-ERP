@@ -1,0 +1,6 @@
+{
+  "name": "Institutional ERP Platform",
+  "description": "Institutional Academic Governance, Student Information System & Result Management ERP with Exam Cell Controller, Principal Permission Desk, and Department Portals.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
