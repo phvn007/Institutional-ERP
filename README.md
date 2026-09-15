@@ -1,20 +1,33 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Institutional ERP Platform - Academic Governance & Examination Portal
 
-# Run and deploy your AI Studio app
+A comprehensive, full-stack Academic Governance and Result Management ERP system designed for enterprise-level institutional workflows. This platform securely handles grading cycles, student attendance compliance, and result publication across collegiate divisions with strict data integrity.
 
-This contains everything you need to run your app locally.
+## ✨ Key Features
 
-View your app in AI Studio: https://ai.studio/apps/03e6d8d1-8951-4d77-857b-635381c0cd5d
+*   **Granular Role-Based Access Control (RBAC):** Tailored dashboards and permissions for Super Admins (Principal), Exam Cell Controllers, Department HODs, Faculty, Technical Assistants, and Students.
+*   **Optimistic Concurrency Control (OCC):** Prevents race conditions during concurrent grade updates or administrative actions using PostgreSQL row-level locking.
+*   **Immutable Audit Ledger:** Tracks every state change and administrative action using a tamper-evident, SHA-256 cryptographic hash chain.
+*   **Asynchronous Processing:** Offloads heavy statistical calculations and batch result publishing to distributed Celery workers via Redis.
+*   **Embedded Analytics:** Generates server-side statistical summaries and bell-curve distribution visualizations using Pandas and Seaborn.
+*   **Dual-Key Security:** Enforces strict executive clearance (e.g., emergency result rollbacks) requiring statutory authorization.
 
-## Run Locally
+## 💻 Technology Stack
 
-**Prerequisites:**  Node.js
+**Frontend**
+*   **Core:** React 19, TypeScript, Vite
+*   **Styling & UI:** Tailwind CSS v4, Motion (animations), Lucide React
+*   **Architecture:** Finite State Machine logic for state transitions
 
+**Backend**
+*   **Framework:** FastAPI (Python 3)
+*   **Database:** PostgreSQL 16 with SQLAlchemy 2.0 & Alembic
+*   **Async Workflows:** Celery, Redis 7
+*   **Data Science:** Pandas, NumPy, Seaborn, Matplotlib
+*   **Security:** JWT authentication, Bcrypt hashing
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+**Infrastructure**
+*   **Containerization:** Docker & Docker Compose
+*   **Web Server:** Nginx (Frontend serving)
+
+for installing node modules npm install
+to run the server npm run dev
